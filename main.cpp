@@ -56,10 +56,13 @@ void initCoord(){
 
 float b_x=2,b_y=3,b_z=2, tap =0.1, r =0.5;
 float cx=0.0, cy=0.0;
+int sing=0;
 void display(void)
 {   glColor3f(0.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	glPushMatrix();
+	glRotated(sing,0,1,0);
 	glTranslatef(cx, 0.0, cy);
         glPushMatrix();
             for(int x=0;x<long_x;++x)
@@ -80,35 +83,35 @@ void display(void)
         glPopMatrix();
     glPopMatrix();
 	glutSwapBuffers();
+	if(coord[(int)b_x-short_x][(int)(b_y-tap)][(int)b_z-short_z]==0){
+	b_y-=0.01;
+	cout<<"x="<<(int)b_x<<"("<<b_x<<")  ";
+	cout<<"y="<<(int)b_y<<"("<<b_y<<")  ";
+	cout<<"z="<<(int)b_z<<"("<<b_z<<")  ";}
 }
-/*
-bool crash(cube c) {
-	if ((x1 - c.x)*(x1 - c.x) + (p_y1 - c.y)*(p_y1 - c.y) - (r1 + r2 / 2) > 0) {
-		return false;
-	}
-	else {
-		return true;
-	}
+
+void go(){
+    switch(sing){
+    case 270: b_x-= (b_x - r - tap >= -short_x) ? tap : 0; break;
+    case 180: b_z+= (b_z + r + tap <=  short_z) ? tap : 0; break;
+    case 90 : b_x+= (b_x + r + tap <=  short_x) ? tap : 0; break;
+    case 0  : b_z-= (b_z - r - tap >= -short_z) ? tap : 0; break;
+    }
 }
-*/
+
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key) {
-	case 'a': b_x += (b_x - r - tap >= -short_x) ? -tap : 0; break;
-	case 'd': b_x += (b_x + r + tap <= short_x) ? tap : 0; break;
-	case 'w': b_z += (b_z + r + tap <= short_z) ? tap : 0; break;
-	case 's': b_z += (b_z - r - tap >= -short_z) ? -tap : 0; break;
+	case 'a': sing-= 90; if(sing<0) sing =360; break;
+	case 'd': sing+= 90; if(sing>=360) sing =0; break;
+	case 'w': {go(); break;}
+	case ' ': b_y+=2;
     case 'h': cx=cx+tap; break;
     case 'k': cx=cx-tap; break;
     case 'u': cy=cy+tap; break;
     case 'j': cy=cy-tap; break;
 
 	}
-	/*
-	for (int i = 0; i < cubes.size(); i++) {
-		cubes[i].crash = crash(cubes[i]) ? true : false;
-	}
-	*/
 }
 
 void arrow_keys(int keys, int x, int y) {
