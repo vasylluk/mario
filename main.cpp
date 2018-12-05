@@ -39,15 +39,25 @@ void initCoord(){
             for(int z=0;z<long_z;++z){
                 coord[x][y][z]=0;
                 }
-    coord[0][2][0]= 1;
+    coord[0][3][0]= 1;
     coord[1][3][0]= 1;
-    coord[2][2][0]= 1;
-    coord[4][2][0]= 1;
+    coord[2][3][0]= 1;
+    coord[4][3][0]= 1;
+    coord[1][2][1]= 1;
+    coord[2][2][1]= 1;
+    coord[3][2][1]= 1;
+    coord[4][2][1]= 1;
     coord[0][3][1]= 1;
+    coord[0][3][1]= 1;
+    coord[0][3][1]= 1;
+    coord[0][3][1]= 1;
+
 }
 
+float b_x=2,b_y=3,b_z=2, tap =0.1, r =0.5;
+
 void display(void)
-{   glColor3f(0.0, 1.0, 1.0);
+{   glColor3f(0.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
         for(int x=0;x<long_x;++x)
@@ -60,6 +70,11 @@ void display(void)
                         glPopMatrix();
                         }
                     }
+        glColor3f(1.0, 0.0, 0.0);
+        glPushMatrix();
+            glTranslated(b_x,b_y,b_z);
+            glutSolidSphere(r,10,10);
+        glPopMatrix();
 	glPopMatrix();
 	glutSwapBuffers();
 }
@@ -72,19 +87,21 @@ bool crash(cube c) {
 		return true;
 	}
 }
-
+*/
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key) {
-	case 'a': x1 += (x1 - r1 - tap >= -3.5) ? -tap : 0; break;
-	case 'd': x1 += (x1 + r1 + tap <= 3.5) ? tap : 0; break;
-	case 'w': p_y1 += (p_y1 + r1 + tap <= 2) ? tap : 0; break;
-	case 's': p_y1 += (p_y1 - r1 - tap >= -2) ? -tap : 0; break;
+	case 'a': b_x += (b_x - r - tap >= -short_x) ? -tap : 0; break;
+	case 'd': b_x += (b_x + r + tap <= short_x) ? tap : 0; break;
+	case 'w': b_z += (b_z + r + tap <= short_z) ? tap : 0; break;
+	case 's': b_z += (b_z - r - tap >= -short_z) ? -tap : 0; break;
 
 	}
+	/*
 	for (int i = 0; i < cubes.size(); i++) {
 		cubes[i].crash = crash(cubes[i]) ? true : false;
 	}
+	*/
 }
 
 void arrow_keys(int keys, int x, int y) {
@@ -93,7 +110,7 @@ void arrow_keys(int keys, int x, int y) {
 	case GLUT_KEY_DOWN:glutReshapeWindow(800, 600); break;
 	}
 }
-*/
+
 int main(int argc, char **argv) {
 	initCoord();
 
@@ -105,8 +122,8 @@ int main(int argc, char **argv) {
 	glutIdleFunc(display);
 	glutDisplayFunc(display);
 	glutReshapeFunc(resize);
-	//glutKeyboardFunc(keyboard);
-	//glutSpecialFunc(arrow_keys);
+	glutKeyboardFunc(keyboard);
+	glutSpecialFunc(arrow_keys);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_COLOR_MATERIAL);
