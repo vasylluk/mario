@@ -55,27 +55,30 @@ void initCoord(){
 }
 
 float b_x=2,b_y=3,b_z=2, tap =0.1, r =0.5;
-
+float cx=0.0, cy=0.0;
 void display(void)
 {   glColor3f(0.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
-        for(int x=0;x<long_x;++x)
-            for(int y=1;y<long_y;++y)
-                for(int z=0;z<long_z;++z){
-                    if(coord[x][y][z] > 0){
-                        glPushMatrix();
-                            glTranslatef(x-short_x, y, z-short_z);
-                            glutSolidCube(0.95);
-                        glPopMatrix();
-                        }
-                    }
-        glColor3f(1.0, 0.0, 0.0);
+	glTranslatef(cx, 0.0, cy);
         glPushMatrix();
-            glTranslated(b_x,b_y,b_z);
-            glutSolidSphere(r,10,10);
+            for(int x=0;x<long_x;++x)
+                for(int y=1;y<long_y;++y)
+                    for(int z=0;z<long_z;++z){
+                        if(coord[x][y][z] > 0){
+                            glPushMatrix();
+                                glTranslatef(x-short_x, y, z-short_z);
+                                glutSolidCube(0.95);
+                            glPopMatrix();
+                            }
+                        }
+            glColor3f(1.0, 0.0, 0.0);
+            glPushMatrix();
+                glTranslated(b_x,b_y,b_z);
+                glutSolidSphere(r,10,10);
+            glPopMatrix();
         glPopMatrix();
-	glPopMatrix();
+    glPopMatrix();
 	glutSwapBuffers();
 }
 /*
@@ -95,6 +98,10 @@ void keyboard(unsigned char key, int x, int y)
 	case 'd': b_x += (b_x + r + tap <= short_x) ? tap : 0; break;
 	case 'w': b_z += (b_z + r + tap <= short_z) ? tap : 0; break;
 	case 's': b_z += (b_z - r - tap >= -short_z) ? -tap : 0; break;
+    case 'h': cx=cx+tap; break;
+    case 'k': cx=cx-tap; break;
+    case 'u': cy=cy+tap; break;
+    case 'j': cy=cy-tap; break;
 
 	}
 	/*
