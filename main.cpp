@@ -18,7 +18,7 @@ void resize(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0, ratio, 0.1, 10);
-	gluLookAt(0, 2, 4, 0, 0, 0, 0, 1, 0);
+	gluLookAt(0, 10, 4, 0, 0, 0, 0, 1, 0);
 	glMatrixMode(GL_MODELVIEW);
 }
 
@@ -28,30 +28,37 @@ void initTypes() {
 
 	types.push_back(type());
 }
-int short_x=2,short_y=2,short_z=2;
-int long_x=short_x*2+1, long_y=short_y*2+1, long_z=short_z*2+1;
+
+int const short_x=2,short_y=3,short_z=2;
+int const long_x=short_x*2+1, long_y=short_y+1, long_z=short_z*2+1;
 int coord[long_x][long_y][long_z];
 
 void initCoord(){
     for(int x=0;x<long_x;++x)
-        for(int y=0;y<long_y;++y)
-            for(int z=0;z<long_z;++z)
+        for(int y=1;y<long_y;++y)
+            for(int z=0;z<long_z;++z){
                 coord[x][y][z]=0;
+                }
+    coord[0][2][0]= 1;
+    coord[1][3][0]= 1;
+    coord[2][2][0]= 1;
+    coord[4][2][0]= 1;
+    coord[0][3][1]= 1;
 }
-
-int zoom
 
 void display(void)
 {   glColor3f(0.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
         for(int x=0;x<long_x;++x)
-            for(int y=0;y<long_y;++y)
+            for(int y=1;y<long_y;++y)
                 for(int z=0;z<long_z;++z){
-                    glPushMatrix();
-                        glTranslatef((x-short_x), (y-short_y), (z-short_z));
-                        glutSolidCube(1);
-                    glPopMatrix();
+                    if(coord[x][y][z] > 0){
+                        glPushMatrix();
+                            glTranslatef(x-short_x, y, z-short_z);
+                            glutSolidCube(0.95);
+                        glPopMatrix();
+                        }
                     }
 	glPopMatrix();
 	glutSwapBuffers();
@@ -88,7 +95,7 @@ void arrow_keys(int keys, int x, int y) {
 }
 */
 int main(int argc, char **argv) {
-	initCubes();
+	initCoord();
 
 	glutInit(&argc, argv);
 	glutInitWindowPosition(50, 50);

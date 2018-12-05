@@ -1,4 +1,7 @@
 # depslib dependency file v1.0
-1544035723 source:/home/rik/opengl/mario/main.cpp
+1544040339 source:/home/rik/opengl/mario/main.cpp
 	<GL/glut.h>
+	<iostream>
+	<string>
+	<vector>
 
