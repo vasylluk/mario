@@ -106,7 +106,9 @@ void initCoord(){
 GLubyte *g_pImage;
 int g_width, g_height;
 GLenum g_format, g_type;
-GLuint ball;
+GLuint ball, backgroundTex;
+
+const char background[] = "back.png";
 const char ballTex[] = "ball.jpg";
 
 void LoadImage(const char *sTextureName)
@@ -157,6 +159,12 @@ int DevILInit()
 
 void initTexture()
 {
+	LoadImage(background);
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D,0,g_format,g_width,g_height,0,g_format,g_type,g_pImage);
+
+
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
@@ -191,6 +199,7 @@ void display(void)
 {   glColor3f(0.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
+
 	glPushMatrix();
 	glRotated(sing,0,1,0);
 	glTranslatef(cx, 0.0, cy);
@@ -201,13 +210,14 @@ void display(void)
                     if(coord[x][y][z] > 0){
                         glPushMatrix();
                             glTranslatef(x-short_x, y, z-short_z);
+                            glColor3f(rand()%2,rand()%2,rand()%2);
                             glutSolidCube(0.95);
                         glPopMatrix();
                     }
                 }
             }
         }
-        glColor3f(0.0, 0.0, 1.0);
+        glColor3f(1.0, 1.0, 1.0);
         for (int i = 0; i < objects.size(); i++) {
             glPushMatrix();
                 glTranslatef(objects[i].x, objects[i].y, objects[i].z);
