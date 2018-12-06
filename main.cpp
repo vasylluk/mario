@@ -1,7 +1,12 @@
 #include <GL/glut.h>
 #include <iostream>
+#include <cstring>
 #include <string>
 #include <vector>
+#define ILUT_USE_OPENGL
+#include <IL/il.h>
+#include <IL/ilut.h>
+#include <IL/ilu.h>
 
 using namespace std;
 
@@ -97,13 +102,95 @@ void initCoord(){
 
 }
 
+
+GLubyte *g_pImage;
+int g_width, g_height;
+GLenum g_format, g_type;
+GLuint ball;
+const char ballTex[] = "ball.jpg";
+
+void LoadImage(const char *sTextureName)
+{
+	ILuint img;
+	ilGenImages(1, &img);
+	ilBindImage(img);
+	if (!ilLoad(IL_TYPE_UNKNOWN, sTextureName))
+	{
+		printf("ERROR: Cann't load image %s\n", sTextureName);
+		exit(-1);
+	}
+
+	g_width = ilGetInteger(IL_IMAGE_WIDTH);
+	g_height = ilGetInteger(IL_IMAGE_HEIGHT);
+	g_format = ilGetInteger(IL_IMAGE_FORMAT);
+	g_type = ilGetInteger(IL_IMAGE_TYPE);
+
+	size_t size = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
+
+	g_pImage = new GLubyte[size];
+
+	memcpy(g_pImage, ilGetData(), size);
+}
+
+int DevILInit()
+{
+   if ( ilGetInteger ( IL_VERSION_NUM ) < IL_VERSION )
+   {
+       fprintf ( stderr, "Incorrect devil.dll version\n" );
+       return 0;
+   }
+   if ( iluGetInteger ( ILU_VERSION_NUM ) < ILU_VERSION )
+   {
+       fprintf ( stderr, "Incorrect ilu.dll version\n" );
+       return 0;
+   }
+   if ( ilutGetInteger ( ILUT_VERSION_NUM ) < ILUT_VERSION )
+   {
+       fprintf ( stderr, "Incorrect ilut.dll version\n" );
+       return 0;
+   }
+   ilInit();
+   iluInit();
+   ilutInit();
+   ilutRenderer(ILUT_OPENGL);
+}
+
+void initTexture()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D,0,g_format,g_width,g_height,
+	0,g_format,g_type,g_pImage);
+
+	ball = ilutGLLoadImage((char*)ballTex);
+
+	GLfloat mat_specular[]={1.0,1.0,1.0,1.0};
+	GLfloat mat_shininess[]={50.0};
+	GLfloat light_position[]={1.0,1.0,1.0,0.0};
+	GLfloat white_light[]={1.0,1.0,1.0,1.0};
+
+	glClearColor(0.0,0.0,0.0,0.0);
+	glShadeModel(GL_SMOOTH);
+	glMaterialfv(GL_FRONT,GL_SPECULAR,mat_specular);
+	glMaterialfv(GL_FRONT,GL_SHININESS,mat_shininess);
+	glLightfv(GL_LIGHT0,GL_POSITION,light_position);
+	glLightfv(GL_LIGHT0,GL_DIFFUSE,white_light);
+	glLightfv(GL_LIGHT0,GL_SPECULAR,white_light);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_AUTO_NORMAL);
+}
+
 float b_x=2,b_y=3,b_z=2, tap =0.1, r =0.5;
 float cx=0.0, cy=0.0;
 int sing=0;
 void display(void)
 {   glColor3f(0.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    glEnable(GL_TEXTURE_2D);
 	glPushMatrix();
 	glRotated(sing,0,1,0);
 	glTranslatef(cx, 0.0, cy);
@@ -129,10 +216,19 @@ void display(void)
         }
         glColor3f(1.0, 0.0, 0.0);
         glPushMatrix();
+            glEnable(GL_TEXTURE_GEN_S);
+            glEnable(GL_TEXTURE_GEN_T);
+            glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+            glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
             glTranslated(b_x,b_y,b_z);
-            glutSolidSphere(r,10,10);
+            glBindTexture(GL_TEXTURE_2D,ball);
+            glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+            glutSolidSphere(r,100,100);
+            glDisable(GL_TEXTURE_GEN_S);
+            glDisable(GL_TEXTURE_GEN_T);
         glPopMatrix();
     glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
 	glutSwapBuffers();
 	if(coord[(int)b_x-short_x][(int)(b_y-tap)][(int)b_z-short_z]==0){
 	b_y-=tap/10;
@@ -161,7 +257,7 @@ bool crash(object c) {
 		return true;
 	}
 }
-
+int score = 0;
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key) {
@@ -169,14 +265,16 @@ void keyboard(unsigned char key, int x, int y)
 	case 'd': sing+= 90; if(sing>=360) sing =0; break;
 	case 'w': {go(); break;}
 	case ' ': b_y+=2;
-    case 'h': cx=cx+tap; break;
-    case 'k': cx=cx-tap; break;
+    case 'h': cx=cx-tap; break;
+    case 'k': cx=cx+tap; break;
     case 'u': cy=cy+tap; break;
     case 'j': cy=cy-tap; break;
 	}
     for (int i = 0; i < objects.size(); i++) {
         if(crash(objects[i])){
             objects.erase(objects.begin()+i);
+            score++;
+            cout<<"score: "<<score<<'\n';
         }
 	}
 	if(objects.size()==0){exit(0);}
@@ -198,6 +296,8 @@ int main(int argc, char **argv) {
 	glutInitWindowSize(640, 480);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
 	glutCreateWindow("OpenGL1 Window");
+	DevILInit();
+	initTexture();
 	glutIdleFunc(display);
 	glutDisplayFunc(display);
 	glutReshapeFunc(resize);

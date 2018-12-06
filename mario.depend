@@ -11,3 +11,13 @@
 	<string>
 	<vector>
 
+1544066601 source:/home/crack/Desktop/mario/mario/main.cpp
+	<GL/glut.h>
+	<iostream>
+	<cstring>
+	<string>
+	<vector>
+	<IL/il.h>
+	<IL/ilut.h>
+	<IL/ilu.h>
+
