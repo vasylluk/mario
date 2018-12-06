@@ -18,7 +18,7 @@ void resize(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0, ratio, 0.1, 10);
-	gluLookAt(0, 10, 4, 0, 0, 0, 0, 1, 0);
+	gluLookAt(3, 5, 0, 0, 3, 0, 1, 1, 0);
 	glMatrixMode(GL_MODELVIEW);
 }
 
@@ -192,17 +192,22 @@ void initTexture()
 	glEnable(GL_AUTO_NORMAL);
 }
 
-float b_x=2,b_y=3,b_z=2, tap =0.1, r =0.5;
+float b_x=0,b_y=3,b_z=0, tap =0.1, r =0.5,old_b_x=0,old_b_z=0;
 float cx=0.0, cy=0.0;
-int sing=0;
+int sing=0, old_sing=0, jamp =0;
 void display(void)
 {   glColor3f(0.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
 
+    glTranslated(old_b_x-b_x,0,old_b_z-b_z);
+    old_b_x=b_x;
+    old_b_z=b_z;
+
+    glRotated(old_sing-sing,0,1,0);
+    old_sing=sing;
+
 	glPushMatrix();
-	glRotated(sing,0,1,0);
-	glTranslatef(cx, 0.0, cy);
     glPushMatrix();
         for(int x=0;x<long_x;++x){
             for(int y=1;y<long_y;++y){
@@ -240,27 +245,34 @@ void display(void)
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
 	glutSwapBuffers();
-	if(coord[(int)b_x-short_x][(int)(b_y-tap)][(int)b_z-short_z]==0){
-	b_y-=tap/10;
+	if(jamp==0){
+        if(coord[(int)b_x-short_x][(int)(b_y-tap)][(int)b_z-short_z]==0){
+            b_y-=0.1;
+            if(b_y<1){exit(0);}
+        }
+    }else{
+        jamp--;
+        b_y+=0.1;
+	}
 	/*
 	cout<<"x="<<(int)b_x<<"("<<b_x<<")  ";
 	cout<<"y="<<(int)b_y<<"("<<b_y<<")  ";
 	cout<<"z="<<(int)b_z<<"("<<b_z<<")  ";
 	*/
-	}
+
 }
 
 void go(){
     switch(sing){
-    case 270: b_x-= (b_x - r - tap >= -short_x) ? tap : 0; break;
-    case 180: b_z+= (b_z + r + tap <=  short_z) ? tap : 0; break;
-    case 90 : b_x+= (b_x + r + tap <=  short_x) ? tap : 0; break;
-    case 0  : b_z-= (b_z - r - tap >= -short_z) ? tap : 0; break;
+    case 0: b_x-= (b_x - r - tap >= -short_x) ? tap : 0; break;
+    case 90: b_z+= (b_z + r + tap <=  short_z) ? tap : 0; break;
+    case 180 : b_x+= (b_x + r + tap <=  short_x) ? tap : 0; break;
+    case 270 : b_z-= (b_z - r - tap >= -short_z) ? tap : 0; break;
     }
 }
 
 bool crash(object c) {
-	if ((b_x - c.x)*(b_x - c.x) + (b_y - c.y)*(b_y - c.y) - ((r +1) / 2) > 0) {
+	if ((b_x - c.x)*(b_x - c.x) + (b_y - c.y)*(b_y - c.y) - ((r)) > 0) {
 		return false;
 	}
 	else {
@@ -271,10 +283,10 @@ int score = 0;
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key) {
-	case 'a': sing-= 90; if(sing<0) sing =360; break;
+	case 'a': sing-= 90; if(sing<0) sing =270; break;
 	case 'd': sing+= 90; if(sing>=360) sing =0; break;
 	case 'w': {go(); break;}
-	case ' ': b_y+=2;
+	case ' ': jamp ==0?jamp=20:0; break;
     case 'h': cx=cx-tap; break;
     case 'k': cx=cx+tap; break;
     case 'u': cy=cy+tap; break;
@@ -313,11 +325,6 @@ int main(int argc, char **argv) {
 	glutReshapeFunc(resize);
 	glutKeyboardFunc(keyboard);
 	glutSpecialFunc(arrow_keys);
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
 
 	glutMainLoop();
 }
